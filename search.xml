@@ -2,7 +2,7 @@
 <search>
   <entry>
     <title>字幕重命名批处理脚本</title>
-    <url>/2021/RenameShell.python/</url>
+    <url>/2021/RenameShell/</url>
     <content><![CDATA[<p>将字幕<code>ass</code>全部重命名为与视频<code>mkv</code>一致</p>
 <span id="more"></span>
 
@@ -86,6 +86,210 @@ D:.
         <tag>批处理</tag>
         <tag>python</tag>
         <tag>ASS</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>OpenCV笔记</title>
+    <url>/2021/openCV_note/</url>
+    <content><![CDATA[<p>最近为了满足一个数字图像处理需求,稍微入门了一下openCv,特此整理用到的主要内容。</p>
+<span id="more"></span>
+
+<h1 id="图片操作"><a href="#图片操作" class="headerlink" title="图片操作"></a>图片操作</h1><h2 id="读取图片"><a href="#读取图片" class="headerlink" title="读取图片"></a>读取图片</h2><figure class="highlight python"><table><tr><td class="code"><pre><span class="line">result=cv2.imread(filepath, cv2.IMREAD_COLOR)</span><br></pre></td></tr></table></figure>
+<ul>
+<li><p>宏<code>cv2.IMREAD_COLOR</code>指读取模式，COLOR–&gt;BRG，GRAYSCALE–&gt;GRAT</p>
+</li>
+<li><p>需要注意的是<code>imread</code>读取出来的并非Image对象，故此不要随意和<code>IMAGE model</code>混用</p>
+</li>
+<li><p>该方法默认以BGR通道读取图像，不同于<code>Image.open</code>的RBG读取方式</p>
+<ul>
+<li>可以用<code>cvtclolr</code>将BGR转RGB，一般用于与<code>matplotlib</code>配合使用。</li>
+<li><code>cvtcolor</code>还可用于将图片灰度化 。</li>
+</ul>
+</li>
+</ul>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">result=cv2.cvtColor(image, cv2.COLOR_BGR2RGB) <span class="comment"># BGR--&gt;RGB</span></span><br><span class="line">result=cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)  <span class="comment">#BGR--&gt;GRAY</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="图像显示"><a href="#图像显示" class="headerlink" title="图像显示"></a>图像显示</h2><h3 id="openCV"><a href="#openCV" class="headerlink" title="openCV"></a>openCV</h3><p>非常不好用，显示小图还可以，大图显示不全，默认不能缩放且缩放非常烂。</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">cv2.imshow( WinName, image)</span><br><span class="line">cv2.waitKey()</span><br><span class="line">cv2.destroyAllWindows()</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><code>winName</code>为显示图像的窗口名称</li>
+<li><code>image</code>为需要显示的图像</li>
+<li><code>waitkey</code>≈system pause 但光标在图像窗口输入才有效</li>
+</ul>
+<h3 id="matplotlib-pyplot"><a href="#matplotlib-pyplot" class="headerlink" title="matplotlib.pyplot"></a>matplotlib.pyplot</h3><p>图像预览比较方便，缩放功能比较好使</p>
+<p><code>Tips:</code>pyplot使用时注意通道顺序,imread以BGR读取图像，而pyplot默认RGB</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">plt.imshow(cv2.cvtColor(outputImage_BGR, cv2.COLOR_BGR2RGB))</span><br><span class="line">plt.show()</span><br></pre></td></tr></table></figure>
+
+<h2 id="图像保存"><a href="#图像保存" class="headerlink" title="图像保存"></a>图像保存</h2><p>imread默认按照BGR读取的图片，与imwrite配合通道不会搞混通道</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">cv2.imwrite(filePath, image)</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><code>filePath</code>保存的文件路径</li>
+<li><code>image</code>需要保存的图片</li>
+</ul>
+<h2 id="图像截取"><a href="#图像截取" class="headerlink" title="图像截取"></a>图像截取</h2><figure class="highlight python"><table><tr><td class="code"><pre><span class="line">result=sourceImage_GRAY[StartY:EndY, StartX:EndX]</span><br></pre></td></tr></table></figure>
+
+<p>X对应于图片横坐标，Y对应于图片纵坐标，当成矩阵对待。</p>
+<h2 id="缩放图片"><a href="#缩放图片" class="headerlink" title="缩放图片"></a>缩放图片</h2><figure class="highlight python"><table><tr><td class="code"><pre><span class="line">result = cv2.resize(sourceImage,(targetX,targetY))</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><p><code>targetX</code>对应你希望缩放到的大小的横轴值</p>
+</li>
+<li><p><code>targetY</code>对应你希望缩放到的大小的纵轴值</p>
+</li>
+</ul>
+<p><code>Tips:</code>我只需要应用缩小图片，放大图片涉及到插值算法等方面，我并未深入</p>
+<h2 id="获取尺寸"><a href="#获取尺寸" class="headerlink" title="获取尺寸"></a>获取尺寸</h2><figure class="highlight python"><table><tr><td class="code"><pre><span class="line">Height, Width = sourceImage.shape[:<span class="number">2</span>]</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><code>shape</code>为(row,cols,channel)分别为:矩阵行、矩阵列、通道数</li>
+<li><code>:2</code>表示except[2]，即除了第三个元素，是对元组的简单截取。</li>
+</ul>
+<h2 id="绘制矩形"><a href="#绘制矩形" class="headerlink" title="绘制矩形"></a>绘制矩形</h2><p>在图片中的某个位置绘制矩形/矩形框</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">cv2.rectangle(outputImage, top_left, bottom_right, channel_value, para)</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><code>outputImage</code>是需要绘制矩形/矩形框的图片</li>
+<li><code>top_left</code>指需要绘制的图片的左上角坐标</li>
+<li><code>bottom_right</code>为所需矩阵的右下角坐标</li>
+<li>根据这两点坐标，即可确定矩阵位置</li>
+<li><code>channel_value</code>指你需要绘制的矩形的通道值，例如对于灰度 255 对于BGR (0,255,0)</li>
+<li><code>para</code>指绘制参数，-1则填充整个矩形，1则只绘制细矩形框，2表示绘制粗矩形框。</li>
+</ul>
+<h1 id="阈值分割"><a href="#阈值分割" class="headerlink" title="阈值分割"></a>阈值分割</h1><p>这一过程也叫做图片的<strong>二值化</strong>。</p>
+<p>我只应用了简单阈值，并未详细深入</p>
+<blockquote>
+<p>参考：</p>
+<p>英文–<a href="https://docs.opencv.org/4.5.1/d7/d1b/group__imgproc__misc.html#gaa9e58d2860d4afa658ef70a9b1115576">ThresholdTypes</a></p>
+<p>中文–<a href="http://www.woshicver.com/FifthSection/4_3_%E5%9B%BE%E5%83%8F%E9%98%88%E5%80%BC/">图像阈值</a></p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">ret, thresh &#x3D; cv2.threshold(gray_img, threshold, value, cv2.THRESH_BINARY)</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><code>ret</code>python多值返回中的一个值，忽略掉即可</li>
+<li><code>img</code>需要阈值分割的图片</li>
+<li><code>threshold</code>阈值，0-255之间的某个值</li>
+<li><code>value</code>阈值分割的结果值，比如需要分割为0和255，则value为255</li>
+<li><code>cv2.THRESH_BINARY</code>指希望选择的阈值分割方式</li>
+</ul>
+<h2 id="简单阈值"><a href="#简单阈值" class="headerlink" title="简单阈值"></a>简单阈值</h2><p>通过设置一个阈值，将<strong>单通道</strong>图片中低于阈值的像素置为0，高于阈值的像素置为255。</p>
+<p>这种方式只能处理极其简单的图片，没有光线等因素的影响</p>
+<p>一般用于处理灰度图像(因为该操作是对于单通道的)</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">ret, thresh = cv2.threshold(img, threshold, <span class="number">255</span>, cv2.THRESH_BINARY)</span><br></pre></td></tr></table></figure>
+
+<h1 id="形态学处理"><a href="#形态学处理" class="headerlink" title="形态学处理"></a>形态学处理</h1><blockquote>
+<p>参考：<br>中文–<a href="http://codec.wang/#/opencv/basic/12-erode-and-dilate">腐蚀与膨胀</a><br>中文–<a href="http://www.woshicver.com/FifthSection/4_5_%E5%BD%A2%E6%80%81%E8%BD%AC%E6%8D%A2/">形态学操作</a><br>英文–<a href="https://docs.opencv.org/4.5.1/d9/d61/tutorial_py_morphological_ops.html">Morphological Transformations</a></p>
+</blockquote>
+<p>定义卷积核</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">from</span> np.magic <span class="keyword">import</span> np</span><br><span class="line">kernel = np.ones((<span class="number">3</span>, <span class="number">3</span>), np.uint8)</span><br><span class="line"><span class="comment"># 生成3x3的卷积核[0][0]--[2][2],9个位置均为1</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="腐蚀"><a href="#腐蚀" class="headerlink" title="腐蚀"></a>腐蚀</h2><p>腐蚀的效果是把目标”变瘦”，其原理是在原图的卷积核小区域内取局部最小值。</p>
+<p>特别对于二值化图来说，小区域内有一个是0则该坐标的卷积结果就为0。</p>
+<p>腐蚀会消除白噪声，但也会缩小物体。</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">erosion = cv2.erode(gray_img,kernel,iterations = <span class="number">1</span>)</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>迭代次数<code>iterations</code>代表连续腐蚀多少次。</li>
+</ul>
+<h2 id="膨胀"><a href="#膨胀" class="headerlink" title="膨胀"></a>膨胀</h2><p>膨胀与腐蚀相反，取的是局部最大值，效果是把目标”变胖”</p>
+<p>膨胀会增加图像中的白色区域或增加前景对象的大小。</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">dilation = cv2.dilate(gray_img,kernel,iterations = <span class="number">1</span>)</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>迭代次数<code>iterations</code>代表连续膨胀多少次。</li>
+</ul>
+<h2 id="开运算"><a href="#开运算" class="headerlink" title="开运算"></a>开运算</h2><p>开运算只是<strong>先侵蚀再扩张</strong>的另一个名称。</p>
+<p>通常在消除噪点时选择先腐蚀再膨胀，因为腐蚀会消除白噪声，但也会缩小物体，因此再对其进行膨胀。</p>
+<p>效果就是噪点消失，待检测目标大小基本正常，还可以将”粘连”的多个物体分开。</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">opening = cv2.morphologyEx(gray_img, cv2.MORPH_OPEN, kernel)</span><br></pre></td></tr></table></figure>
+
+<h2 id="闭运算"><a href="#闭运算" class="headerlink" title="闭运算"></a>闭运算</h2><p>闭运算为<strong>先扩张再侵蚀</strong>，与开运算相反。</p>
+<p>闭运算在消除目标上的黑噪点时有效。</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">closing = cv2.morphologyEx(gray_img, cv2.MORPH_CLOSE, kernel)</span><br></pre></td></tr></table></figure>
+
+<h1 id="轮廓寻找"><a href="#轮廓寻找" class="headerlink" title="轮廓寻找"></a>轮廓寻找</h1><blockquote>
+<p>参考：</p>
+<p>中文–<a href="http://www.woshicver.com/FifthSection/4_9_1_OpenCV%E4%B8%AD%E7%9A%84%E8%BD%AE%E5%BB%93/">轮廓入门</a></p>
+<p>中文–<a href="http://codec.wang/#/opencv/basic/13-contours">轮廓</a></p>
+</blockquote>
+<p>轮廓是图片中物体的边缘点的集合。</p>
+<p>图片经过形态学处理(提高结果准确度)后二值化(只能对二值化图像操作)，就可以进行轮廓寻找</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">contours, hierarchy = cv2.findContours(thresh, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><code>contours</code>是寻找出来的轮廓的集合，一维数组，0-len 是由最外层到最内层的轮廓编号</li>
+<li><code>hierarchy</code>是轮廓的树形结构，包含轮廓之间的父子兄弟关系</li>
+<li><code>thresh</code>是你需要进行轮廓查找的二值化图片</li>
+<li><code>cv2.CHAIN_APPROX_SIMPLE</code>是轮廓近似方法，该方法对轮廓以线段方式存储来节省空间</li>
+<li><code>cv2.RETR_TREE</code>表示查找到轮廓同时返回亲属树</li>
+</ul>
+<h2 id="绘制轮廓"><a href="#绘制轮廓" class="headerlink" title="绘制轮廓"></a>绘制轮廓</h2><figure class="highlight python"><table><tr><td class="code"><pre><span class="line">cv.drawContours(img, contours, which, channel_value, para) </span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><code>img</code>是需要绘制轮廓的图片</li>
+<li><code>channel_value</code>指你需要绘制的矩形的通道值，例如对于灰度 255 对于BGR (0,255,0)</li>
+<li><code>which</code>指需要绘制的轮廓的编号,-1为全部绘制</li>
+<li><code>para</code>指绘制参数，-1则填充整个矩形，1则只绘制细矩形框，2表示绘制粗矩形框</li>
+</ul>
+<h1 id="模板匹配"><a href="#模板匹配" class="headerlink" title="模板匹配"></a>模板匹配</h1><p>模板匹配是指给定一张图片(模板)然后在另一幅图像中寻找这个模板的操作。它是一种用来在一幅大图中寻找模板图像位置的方法,若两图片相同或者大小逆置，返回-1</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">result = cv2.matchTemplate(targetImage, templateImage, cv2.TM_CCOEFF_NORMED)</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><p>它的工作原理为卷积</p>
+</li>
+<li><p>可视为滑动平均推广， 将模板图像在输入图像(大图)上滑动，在每一个位置进行比较</p>
+</li>
+<li><p><code>result</code>是一个<strong>单通道图像</strong>，每一个像素值表示了此区域与模板的<strong>匹配程度</strong></p>
+</li>
+<li><p>宏<code>cv2.TM_CCOEFF_NORMED</code>代表希望选择的匹配算法</p>
+</li>
+</ul>
+<h2 id="匹配步骤"><a href="#匹配步骤" class="headerlink" title="匹配步骤"></a>匹配步骤</h2><ol>
+<li><p>输入原图像(I)和模板图像(T)。在原图像中我们希望找到一块和模板匹配的区域</p>
+</li>
+<li><p>通过将模板在原图像上滑动来寻找最匹配的区域。 这里所谓的滑动是指模板图像块一次移动一个像素(从左往右，从上往下)。 在每一个位置，都进行一次度量计算，来判断该像素对应的原图像的特定区域 与模板图像的相似度。</p>
+</li>
+<li><p>对于模板T覆盖在I上的每个位置，把上一步计算的度量值保存在结果图像矩阵R中。 在R中每个位置都包含对应的匹配度量值。</p>
+</li>
+<li><p>在结果图像矩阵中寻找最值(最大或最小，根据算法不同而不同)。最值所对应的像素的位置即认为是最高的匹配。 以该点为顶点，长宽和模板大小图像一样的矩阵认为是匹配区域。</p>
+</li>
+</ol>
+<h2 id="匹配算法"><a href="#匹配算法" class="headerlink" title="匹配算法"></a>匹配算法</h2><p>在匹配步骤中有个核心问题， 那就是如何度量匹配程度，如何进行度量计算。</p>
+<p>OpenCV提供了6种不同的基础匹配方法。</p>
+<p>在下列公式中， T(x,y)表示模板，I(x,y)表示原图像，R(x,y)表示模板与原图相似度函数。 x、y表示某个像素，x’、y’表示循环变量，在模板那么大的范围内进行循环滑动。</p>
+<h3 id="平方差匹配-TM-SQDIFF"><a href="#平方差匹配-TM-SQDIFF" class="headerlink" title="平方差匹配(TM_SQDIFF)"></a>平方差匹配(TM_SQDIFF)</h3><p><img src="https://resource-station.github.io/MathsFormulas/matchTemplate/TM_SQDIFF.png" alt="TM_SQDIFF"></p>
+<p>将模板中的像素依次与对应原图中的区域<strong>作差再平方求和</strong>，得到R。匹配越好，差值越小，R值越小。</p>
+<h3 id="标准平方差匹配-TM-SQDIFF-NORMED"><a href="#标准平方差匹配-TM-SQDIFF-NORMED" class="headerlink" title="标准平方差匹配(TM_SQDIFF_NORMED)"></a>标准平方差匹配(TM_SQDIFF_NORMED)</h3><p><img src="https://resource-station.github.io/MathsFormulas/matchTemplate/TM_SQDIFF_NORMED.png" alt="TM_SQDIFF_NORMED"></p>
+<p>这个公式其实是对图像和模板进行了标准化操作，这样可以保证当模板和图像各个像素的亮度都乘上同一个系数时，相关度不变。 即当I(x,y)和T(x,y)变成kI(x,y)和kT(x,y)时，相关系数还是R(x,y)。与上面一样，匹配越好，R值越小。</p>
+<h3 id="相关匹配-TM-CCORR"><a href="#相关匹配-TM-CCORR" class="headerlink" title="相关匹配(TM_CCORR)"></a>相关匹配(TM_CCORR)</h3><p><img src="https://resource-station.github.io/MathsFormulas/matchTemplate/TM_CCORR.png" alt="TM_CCORR"><br>这类方法采用模板和图像间的乘法操作，所以较大的数表示匹配程度较高，0标识最坏的匹配效果。</p>
+<h3 id="标准相关匹配-TM-CCORR-NORMED"><a href="#标准相关匹配-TM-CCORR-NORMED" class="headerlink" title="标准相关匹配(TM_CCORR_NORMED)"></a>标准相关匹配(TM_CCORR_NORMED)</h3><p><img src="https://resource-station.github.io/MathsFormulas/matchTemplate/TM_CCORR_NORMED.png" alt="TM_CCORR_NORMED"><br>这种方法和第二种类似，同样是通过标准化从而去除了亮度线性变化对相似度计算的影响。匹配越好R值越高。</p>
+<h3 id="相关匹配-TM-CCOEFF"><a href="#相关匹配-TM-CCOEFF" class="headerlink" title="相关匹配(TM_CCOEFF)"></a>相关匹配(TM_CCOEFF)</h3><p>虽然也叫做相关匹配，但是和上面的还是有点不同。不同之处在于，把原图和模板都减去了各自的平均值。</p>
+<p><img src="https://resource-station.github.io/MathsFormulas/matchTemplate/TM_CCOEFF.png" alt="TM_CCOEFF">。</p>
+<h3 id="标准相关匹配-TM-CCOEFF-NORMED"><a href="#标准相关匹配-TM-CCOEFF-NORMED" class="headerlink" title="标准相关匹配(TM_CCOEFF_NORMED)"></a>标准相关匹配(TM_CCOEFF_NORMED)</h3><p>相比于上一个方法，这里又除了各自方差。经过减去平均值和除以方差这么两步操作之后， 无论是我们的待检图像还是模板都被标准化了， 这样可以保证图像和模板分别改变光照亮不影响计算结果。</p>
+<p><img src="https://resource-station.github.io/MathsFormulas/matchTemplate/TM_CCOEFF_NORMED.png" alt="TM_CCOEFF_NORMED">。</p>
+<h2 id="获取坐标"><a href="#获取坐标" class="headerlink" title="获取坐标"></a>获取坐标</h2><p>前文提起过result是一副单通道图像，每一个位置都代表了模板在原图滑动时对应位置算出的相关系数。</p>
+<p>所以只需要找出最匹配的那一点的坐标即可。</p>
+<p>在OpenCV中可以用<code>cv2.minMaxLoc()</code>函数获得单通道图片的通道最值坐标。</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">minValue, maxValue, minValueLocation, maxValuelocation = cv2.minMaxLoc(result) </span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><code>minValue</code>指系数最小的点的系数值，<code>maxValue</code>同理</li>
+<li><code>minValue location</code>指系数最小的点的坐标，<code>maxValue location</code>同理</li>
+<li>相关系数与最佳匹配之间的关系对于不同的匹配算法不尽相同</li>
+<li>根据<code>TM_CCOEFF_NORMED</code>算法可知，完全匹配的值为1，即bestMatch = maxValue</li>
+</ul>
+<p>轮廓识别是用直线来围成轮廓，而不是用点来围成轮廓，节省了空间</p>
+<p>轮廓识别(生成关系树)对最外层是取内侧像素点，对下一层是取外侧像素点</p>
+<p>奇数轮廓取外侧像素点，偶数轮廓取内侧像素点，像素级运算求长度时应当对齐,内侧+1，外侧-1</p>
+<p>求两个轮廓（偶数轮廓-奇树轮廓）之间的距离，用leftmost1-leftmost2-1</p>
+]]></content>
+      <tags>
+        <tag>python</tag>
+        <tag>OpenCV</tag>
+        <tag>数字图像处理</tag>
+        <tag>轮廓检测</tag>
+        <tag>模板匹配</tag>
       </tags>
   </entry>
   <entry>

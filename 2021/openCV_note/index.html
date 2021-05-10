@@ -1,0 +1,734 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+  <meta http-equiv="Cache-Control" content="no-transform">
+  <meta http-equiv="Cache-Control" content="no-siteapp">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-loading-bar.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"ziqiangyoung.github.io","root":"/","scheme":"Mist","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="最近为了满足一个数字图像处理需求,稍微入门了一下openCv,特此整理用到的主要内容。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="OpenCV笔记">
+<meta property="og:url" content="https://ziqiangyoung.github.io/2021/openCV_note/index.html">
+<meta property="og:site_name" content="Young">
+<meta property="og:description" content="最近为了满足一个数字图像处理需求,稍微入门了一下openCv,特此整理用到的主要内容。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://resource-station.github.io/MathsFormulas/matchTemplate/TM_SQDIFF.png">
+<meta property="og:image" content="https://resource-station.github.io/MathsFormulas/matchTemplate/TM_SQDIFF_NORMED.png">
+<meta property="og:image" content="https://resource-station.github.io/MathsFormulas/matchTemplate/TM_CCORR.png">
+<meta property="og:image" content="https://resource-station.github.io/MathsFormulas/matchTemplate/TM_CCORR_NORMED.png">
+<meta property="og:image" content="https://resource-station.github.io/MathsFormulas/matchTemplate/TM_CCOEFF.png">
+<meta property="og:image" content="https://resource-station.github.io/MathsFormulas/matchTemplate/TM_CCOEFF_NORMED.png">
+<meta property="article:published_time" content="2021-02-14T16:00:00.000Z">
+<meta property="article:modified_time" content="2021-05-05T05:23:38.320Z">
+<meta property="article:author" content="Ziqiang Young">
+<meta property="article:tag" content="python">
+<meta property="article:tag" content="OpenCV">
+<meta property="article:tag" content="数字图像处理">
+<meta property="article:tag" content="轮廓检测">
+<meta property="article:tag" content="模板匹配">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://resource-station.github.io/MathsFormulas/matchTemplate/TM_SQDIFF.png">
+
+<link rel="canonical" href="https://ziqiangyoung.github.io/2021/openCV_note/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>OpenCV笔记 | Young</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Young</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">blog</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+  <a href="https://github.com/ZiqiangYoung" class="github-corner" title="Follow me on GitHub" aria-label="Follow me on GitHub" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://ziqiangyoung.github.io/2021/openCV_note/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://resource-station.github.io/Avatar/Comrade-215x215.jpg">
+      <meta itemprop="name" content="Ziqiang Young">
+      <meta itemprop="description" content="人海汹涌，红旗飘扬，呼声嘹亮">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Young">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          OpenCV笔记
+        </h1>
+
+        <div class="post-meta">
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2021-05-05 13:23:38" itemprop="dateModified" datetime="2021-05-05T13:23:38+08:00">2021-05-05</time>
+              </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>4.7k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>4 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>最近为了满足一个数字图像处理需求,稍微入门了一下openCv,特此整理用到的主要内容。</p>
+<span id="more"></span>
+
+<h1 id="图片操作"><a href="#图片操作" class="headerlink" title="图片操作"></a>图片操作</h1><h2 id="读取图片"><a href="#读取图片" class="headerlink" title="读取图片"></a>读取图片</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">result=cv2.imread(filepath, cv2.IMREAD_COLOR)</span><br></pre></td></tr></table></figure>
+<ul>
+<li><p>宏<code>cv2.IMREAD_COLOR</code>指读取模式，COLOR–&gt;BRG，GRAYSCALE–&gt;GRAT</p>
+</li>
+<li><p>需要注意的是<code>imread</code>读取出来的并非Image对象，故此不要随意和<code>IMAGE model</code>混用</p>
+</li>
+<li><p>该方法默认以BGR通道读取图像，不同于<code>Image.open</code>的RBG读取方式</p>
+<ul>
+<li>可以用<code>cvtclolr</code>将BGR转RGB，一般用于与<code>matplotlib</code>配合使用。</li>
+<li><code>cvtcolor</code>还可用于将图片灰度化 。</li>
+</ul>
+</li>
+</ul>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">result=cv2.cvtColor(image, cv2.COLOR_BGR2RGB) <span class="comment"># BGR--&gt;RGB</span></span><br><span class="line">result=cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)  <span class="comment">#BGR--&gt;GRAY</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="图像显示"><a href="#图像显示" class="headerlink" title="图像显示"></a>图像显示</h2><h3 id="openCV"><a href="#openCV" class="headerlink" title="openCV"></a>openCV</h3><p>非常不好用，显示小图还可以，大图显示不全，默认不能缩放且缩放非常烂。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">cv2.imshow( WinName, image)</span><br><span class="line">cv2.waitKey()</span><br><span class="line">cv2.destroyAllWindows()</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><code>winName</code>为显示图像的窗口名称</li>
+<li><code>image</code>为需要显示的图像</li>
+<li><code>waitkey</code>≈system pause 但光标在图像窗口输入才有效</li>
+</ul>
+<h3 id="matplotlib-pyplot"><a href="#matplotlib-pyplot" class="headerlink" title="matplotlib.pyplot"></a>matplotlib.pyplot</h3><p>图像预览比较方便，缩放功能比较好使</p>
+<p><code>Tips:</code>pyplot使用时注意通道顺序,imread以BGR读取图像，而pyplot默认RGB</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">plt.imshow(cv2.cvtColor(outputImage_BGR, cv2.COLOR_BGR2RGB))</span><br><span class="line">plt.show()</span><br></pre></td></tr></table></figure>
+
+<h2 id="图像保存"><a href="#图像保存" class="headerlink" title="图像保存"></a>图像保存</h2><p>imread默认按照BGR读取的图片，与imwrite配合通道不会搞混通道</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cv2.imwrite(filePath, image)</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><code>filePath</code>保存的文件路径</li>
+<li><code>image</code>需要保存的图片</li>
+</ul>
+<h2 id="图像截取"><a href="#图像截取" class="headerlink" title="图像截取"></a>图像截取</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">result=sourceImage_GRAY[StartY:EndY, StartX:EndX]</span><br></pre></td></tr></table></figure>
+
+<p>X对应于图片横坐标，Y对应于图片纵坐标，当成矩阵对待。</p>
+<h2 id="缩放图片"><a href="#缩放图片" class="headerlink" title="缩放图片"></a>缩放图片</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">result = cv2.resize(sourceImage,(targetX,targetY))</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><p><code>targetX</code>对应你希望缩放到的大小的横轴值</p>
+</li>
+<li><p><code>targetY</code>对应你希望缩放到的大小的纵轴值</p>
+</li>
+</ul>
+<p><code>Tips:</code>我只需要应用缩小图片，放大图片涉及到插值算法等方面，我并未深入</p>
+<h2 id="获取尺寸"><a href="#获取尺寸" class="headerlink" title="获取尺寸"></a>获取尺寸</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Height, Width = sourceImage.shape[:<span class="number">2</span>]</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><code>shape</code>为(row,cols,channel)分别为:矩阵行、矩阵列、通道数</li>
+<li><code>:2</code>表示except[2]，即除了第三个元素，是对元组的简单截取。</li>
+</ul>
+<h2 id="绘制矩形"><a href="#绘制矩形" class="headerlink" title="绘制矩形"></a>绘制矩形</h2><p>在图片中的某个位置绘制矩形/矩形框</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cv2.rectangle(outputImage, top_left, bottom_right, channel_value, para)</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><code>outputImage</code>是需要绘制矩形/矩形框的图片</li>
+<li><code>top_left</code>指需要绘制的图片的左上角坐标</li>
+<li><code>bottom_right</code>为所需矩阵的右下角坐标</li>
+<li>根据这两点坐标，即可确定矩阵位置</li>
+<li><code>channel_value</code>指你需要绘制的矩形的通道值，例如对于灰度 255 对于BGR (0,255,0)</li>
+<li><code>para</code>指绘制参数，-1则填充整个矩形，1则只绘制细矩形框，2表示绘制粗矩形框。</li>
+</ul>
+<h1 id="阈值分割"><a href="#阈值分割" class="headerlink" title="阈值分割"></a>阈值分割</h1><p>这一过程也叫做图片的<strong>二值化</strong>。</p>
+<p>我只应用了简单阈值，并未详细深入</p>
+<blockquote>
+<p>参考：</p>
+<p>英文–<a target="_blank" rel="noopener" href="https://docs.opencv.org/4.5.1/d7/d1b/group__imgproc__misc.html#gaa9e58d2860d4afa658ef70a9b1115576">ThresholdTypes</a></p>
+<p>中文–<a target="_blank" rel="noopener" href="http://www.woshicver.com/FifthSection/4_3_%E5%9B%BE%E5%83%8F%E9%98%88%E5%80%BC/">图像阈值</a></p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ret, thresh &#x3D; cv2.threshold(gray_img, threshold, value, cv2.THRESH_BINARY)</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><code>ret</code>python多值返回中的一个值，忽略掉即可</li>
+<li><code>img</code>需要阈值分割的图片</li>
+<li><code>threshold</code>阈值，0-255之间的某个值</li>
+<li><code>value</code>阈值分割的结果值，比如需要分割为0和255，则value为255</li>
+<li><code>cv2.THRESH_BINARY</code>指希望选择的阈值分割方式</li>
+</ul>
+<h2 id="简单阈值"><a href="#简单阈值" class="headerlink" title="简单阈值"></a>简单阈值</h2><p>通过设置一个阈值，将<strong>单通道</strong>图片中低于阈值的像素置为0，高于阈值的像素置为255。</p>
+<p>这种方式只能处理极其简单的图片，没有光线等因素的影响</p>
+<p>一般用于处理灰度图像(因为该操作是对于单通道的)</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ret, thresh = cv2.threshold(img, threshold, <span class="number">255</span>, cv2.THRESH_BINARY)</span><br></pre></td></tr></table></figure>
+
+<h1 id="形态学处理"><a href="#形态学处理" class="headerlink" title="形态学处理"></a>形态学处理</h1><blockquote>
+<p>参考：<br>中文–<a target="_blank" rel="noopener" href="http://codec.wang/#/opencv/basic/12-erode-and-dilate">腐蚀与膨胀</a><br>中文–<a target="_blank" rel="noopener" href="http://www.woshicver.com/FifthSection/4_5_%E5%BD%A2%E6%80%81%E8%BD%AC%E6%8D%A2/">形态学操作</a><br>英文–<a target="_blank" rel="noopener" href="https://docs.opencv.org/4.5.1/d9/d61/tutorial_py_morphological_ops.html">Morphological Transformations</a></p>
+</blockquote>
+<p>定义卷积核</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> np.magic <span class="keyword">import</span> np</span><br><span class="line">kernel = np.ones((<span class="number">3</span>, <span class="number">3</span>), np.uint8)</span><br><span class="line"><span class="comment"># 生成3x3的卷积核[0][0]--[2][2],9个位置均为1</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="腐蚀"><a href="#腐蚀" class="headerlink" title="腐蚀"></a>腐蚀</h2><p>腐蚀的效果是把目标”变瘦”，其原理是在原图的卷积核小区域内取局部最小值。</p>
+<p>特别对于二值化图来说，小区域内有一个是0则该坐标的卷积结果就为0。</p>
+<p>腐蚀会消除白噪声，但也会缩小物体。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">erosion = cv2.erode(gray_img,kernel,iterations = <span class="number">1</span>)</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>迭代次数<code>iterations</code>代表连续腐蚀多少次。</li>
+</ul>
+<h2 id="膨胀"><a href="#膨胀" class="headerlink" title="膨胀"></a>膨胀</h2><p>膨胀与腐蚀相反，取的是局部最大值，效果是把目标”变胖”</p>
+<p>膨胀会增加图像中的白色区域或增加前景对象的大小。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">dilation = cv2.dilate(gray_img,kernel,iterations = <span class="number">1</span>)</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>迭代次数<code>iterations</code>代表连续膨胀多少次。</li>
+</ul>
+<h2 id="开运算"><a href="#开运算" class="headerlink" title="开运算"></a>开运算</h2><p>开运算只是<strong>先侵蚀再扩张</strong>的另一个名称。</p>
+<p>通常在消除噪点时选择先腐蚀再膨胀，因为腐蚀会消除白噪声，但也会缩小物体，因此再对其进行膨胀。</p>
+<p>效果就是噪点消失，待检测目标大小基本正常，还可以将”粘连”的多个物体分开。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">opening = cv2.morphologyEx(gray_img, cv2.MORPH_OPEN, kernel)</span><br></pre></td></tr></table></figure>
+
+<h2 id="闭运算"><a href="#闭运算" class="headerlink" title="闭运算"></a>闭运算</h2><p>闭运算为<strong>先扩张再侵蚀</strong>，与开运算相反。</p>
+<p>闭运算在消除目标上的黑噪点时有效。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">closing = cv2.morphologyEx(gray_img, cv2.MORPH_CLOSE, kernel)</span><br></pre></td></tr></table></figure>
+
+<h1 id="轮廓寻找"><a href="#轮廓寻找" class="headerlink" title="轮廓寻找"></a>轮廓寻找</h1><blockquote>
+<p>参考：</p>
+<p>中文–<a target="_blank" rel="noopener" href="http://www.woshicver.com/FifthSection/4_9_1_OpenCV%E4%B8%AD%E7%9A%84%E8%BD%AE%E5%BB%93/">轮廓入门</a></p>
+<p>中文–<a target="_blank" rel="noopener" href="http://codec.wang/#/opencv/basic/13-contours">轮廓</a></p>
+</blockquote>
+<p>轮廓是图片中物体的边缘点的集合。</p>
+<p>图片经过形态学处理(提高结果准确度)后二值化(只能对二值化图像操作)，就可以进行轮廓寻找</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">contours, hierarchy = cv2.findContours(thresh, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><code>contours</code>是寻找出来的轮廓的集合，一维数组，0-len 是由最外层到最内层的轮廓编号</li>
+<li><code>hierarchy</code>是轮廓的树形结构，包含轮廓之间的父子兄弟关系</li>
+<li><code>thresh</code>是你需要进行轮廓查找的二值化图片</li>
+<li><code>cv2.CHAIN_APPROX_SIMPLE</code>是轮廓近似方法，该方法对轮廓以线段方式存储来节省空间</li>
+<li><code>cv2.RETR_TREE</code>表示查找到轮廓同时返回亲属树</li>
+</ul>
+<h2 id="绘制轮廓"><a href="#绘制轮廓" class="headerlink" title="绘制轮廓"></a>绘制轮廓</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cv.drawContours(img, contours, which, channel_value, para) </span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><code>img</code>是需要绘制轮廓的图片</li>
+<li><code>channel_value</code>指你需要绘制的矩形的通道值，例如对于灰度 255 对于BGR (0,255,0)</li>
+<li><code>which</code>指需要绘制的轮廓的编号,-1为全部绘制</li>
+<li><code>para</code>指绘制参数，-1则填充整个矩形，1则只绘制细矩形框，2表示绘制粗矩形框</li>
+</ul>
+<h1 id="模板匹配"><a href="#模板匹配" class="headerlink" title="模板匹配"></a>模板匹配</h1><p>模板匹配是指给定一张图片(模板)然后在另一幅图像中寻找这个模板的操作。它是一种用来在一幅大图中寻找模板图像位置的方法,若两图片相同或者大小逆置，返回-1</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">result = cv2.matchTemplate(targetImage, templateImage, cv2.TM_CCOEFF_NORMED)</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><p>它的工作原理为卷积</p>
+</li>
+<li><p>可视为滑动平均推广， 将模板图像在输入图像(大图)上滑动，在每一个位置进行比较</p>
+</li>
+<li><p><code>result</code>是一个<strong>单通道图像</strong>，每一个像素值表示了此区域与模板的<strong>匹配程度</strong></p>
+</li>
+<li><p>宏<code>cv2.TM_CCOEFF_NORMED</code>代表希望选择的匹配算法</p>
+</li>
+</ul>
+<h2 id="匹配步骤"><a href="#匹配步骤" class="headerlink" title="匹配步骤"></a>匹配步骤</h2><ol>
+<li><p>输入原图像(I)和模板图像(T)。在原图像中我们希望找到一块和模板匹配的区域</p>
+</li>
+<li><p>通过将模板在原图像上滑动来寻找最匹配的区域。 这里所谓的滑动是指模板图像块一次移动一个像素(从左往右，从上往下)。 在每一个位置，都进行一次度量计算，来判断该像素对应的原图像的特定区域 与模板图像的相似度。</p>
+</li>
+<li><p>对于模板T覆盖在I上的每个位置，把上一步计算的度量值保存在结果图像矩阵R中。 在R中每个位置都包含对应的匹配度量值。</p>
+</li>
+<li><p>在结果图像矩阵中寻找最值(最大或最小，根据算法不同而不同)。最值所对应的像素的位置即认为是最高的匹配。 以该点为顶点，长宽和模板大小图像一样的矩阵认为是匹配区域。</p>
+</li>
+</ol>
+<h2 id="匹配算法"><a href="#匹配算法" class="headerlink" title="匹配算法"></a>匹配算法</h2><p>在匹配步骤中有个核心问题， 那就是如何度量匹配程度，如何进行度量计算。</p>
+<p>OpenCV提供了6种不同的基础匹配方法。</p>
+<p>在下列公式中， T(x,y)表示模板，I(x,y)表示原图像，R(x,y)表示模板与原图相似度函数。 x、y表示某个像素，x’、y’表示循环变量，在模板那么大的范围内进行循环滑动。</p>
+<h3 id="平方差匹配-TM-SQDIFF"><a href="#平方差匹配-TM-SQDIFF" class="headerlink" title="平方差匹配(TM_SQDIFF)"></a>平方差匹配(TM_SQDIFF)</h3><p><img src="https://resource-station.github.io/MathsFormulas/matchTemplate/TM_SQDIFF.png" alt="TM_SQDIFF"></p>
+<p>将模板中的像素依次与对应原图中的区域<strong>作差再平方求和</strong>，得到R。匹配越好，差值越小，R值越小。</p>
+<h3 id="标准平方差匹配-TM-SQDIFF-NORMED"><a href="#标准平方差匹配-TM-SQDIFF-NORMED" class="headerlink" title="标准平方差匹配(TM_SQDIFF_NORMED)"></a>标准平方差匹配(TM_SQDIFF_NORMED)</h3><p><img src="https://resource-station.github.io/MathsFormulas/matchTemplate/TM_SQDIFF_NORMED.png" alt="TM_SQDIFF_NORMED"></p>
+<p>这个公式其实是对图像和模板进行了标准化操作，这样可以保证当模板和图像各个像素的亮度都乘上同一个系数时，相关度不变。 即当I(x,y)和T(x,y)变成kI(x,y)和kT(x,y)时，相关系数还是R(x,y)。与上面一样，匹配越好，R值越小。</p>
+<h3 id="相关匹配-TM-CCORR"><a href="#相关匹配-TM-CCORR" class="headerlink" title="相关匹配(TM_CCORR)"></a>相关匹配(TM_CCORR)</h3><p><img src="https://resource-station.github.io/MathsFormulas/matchTemplate/TM_CCORR.png" alt="TM_CCORR"><br>这类方法采用模板和图像间的乘法操作，所以较大的数表示匹配程度较高，0标识最坏的匹配效果。</p>
+<h3 id="标准相关匹配-TM-CCORR-NORMED"><a href="#标准相关匹配-TM-CCORR-NORMED" class="headerlink" title="标准相关匹配(TM_CCORR_NORMED)"></a>标准相关匹配(TM_CCORR_NORMED)</h3><p><img src="https://resource-station.github.io/MathsFormulas/matchTemplate/TM_CCORR_NORMED.png" alt="TM_CCORR_NORMED"><br>这种方法和第二种类似，同样是通过标准化从而去除了亮度线性变化对相似度计算的影响。匹配越好R值越高。</p>
+<h3 id="相关匹配-TM-CCOEFF"><a href="#相关匹配-TM-CCOEFF" class="headerlink" title="相关匹配(TM_CCOEFF)"></a>相关匹配(TM_CCOEFF)</h3><p>虽然也叫做相关匹配，但是和上面的还是有点不同。不同之处在于，把原图和模板都减去了各自的平均值。</p>
+<p><img src="https://resource-station.github.io/MathsFormulas/matchTemplate/TM_CCOEFF.png" alt="TM_CCOEFF">。</p>
+<h3 id="标准相关匹配-TM-CCOEFF-NORMED"><a href="#标准相关匹配-TM-CCOEFF-NORMED" class="headerlink" title="标准相关匹配(TM_CCOEFF_NORMED)"></a>标准相关匹配(TM_CCOEFF_NORMED)</h3><p>相比于上一个方法，这里又除了各自方差。经过减去平均值和除以方差这么两步操作之后， 无论是我们的待检图像还是模板都被标准化了， 这样可以保证图像和模板分别改变光照亮不影响计算结果。</p>
+<p><img src="https://resource-station.github.io/MathsFormulas/matchTemplate/TM_CCOEFF_NORMED.png" alt="TM_CCOEFF_NORMED">。</p>
+<h2 id="获取坐标"><a href="#获取坐标" class="headerlink" title="获取坐标"></a>获取坐标</h2><p>前文提起过result是一副单通道图像，每一个位置都代表了模板在原图滑动时对应位置算出的相关系数。</p>
+<p>所以只需要找出最匹配的那一点的坐标即可。</p>
+<p>在OpenCV中可以用<code>cv2.minMaxLoc()</code>函数获得单通道图片的通道最值坐标。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">minValue, maxValue, minValueLocation, maxValuelocation = cv2.minMaxLoc(result) </span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><code>minValue</code>指系数最小的点的系数值，<code>maxValue</code>同理</li>
+<li><code>minValue location</code>指系数最小的点的坐标，<code>maxValue location</code>同理</li>
+<li>相关系数与最佳匹配之间的关系对于不同的匹配算法不尽相同</li>
+<li>根据<code>TM_CCOEFF_NORMED</code>算法可知，完全匹配的值为1，即bestMatch = maxValue</li>
+</ul>
+<p>轮廓识别是用直线来围成轮廓，而不是用点来围成轮廓，节省了空间</p>
+<p>轮廓识别(生成关系树)对最外层是取内侧像素点，对下一层是取外侧像素点</p>
+<p>奇数轮廓取外侧像素点，偶数轮廓取内侧像素点，像素级运算求长度时应当对齐,内侧+1，外侧-1</p>
+<p>求两个轮廓（偶数轮廓-奇树轮廓）之间的距离，用leftmost1-leftmost2-1</p>
+
+    </div>
+
+    
+    
+    
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>Ziqiang Young
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://ziqiangyoung.github.io/2021/openCV_note/" title="OpenCV笔记">https://ziqiangyoung.github.io/2021/openCV_note/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+          
+          <div class="post-tags">
+              <a href="/tags/python/" rel="tag"><i class="fa fa-tag"></i> python</a>
+              <a href="/tags/OpenCV/" rel="tag"><i class="fa fa-tag"></i> OpenCV</a>
+              <a href="/tags/%E6%95%B0%E5%AD%97%E5%9B%BE%E5%83%8F%E5%A4%84%E7%90%86/" rel="tag"><i class="fa fa-tag"></i> 数字图像处理</a>
+              <a href="/tags/%E8%BD%AE%E5%BB%93%E6%A3%80%E6%B5%8B/" rel="tag"><i class="fa fa-tag"></i> 轮廓检测</a>
+              <a href="/tags/%E6%A8%A1%E6%9D%BF%E5%8C%B9%E9%85%8D/" rel="tag"><i class="fa fa-tag"></i> 模板匹配</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2021/RenameShell/" rel="prev" title="字幕重命名批处理脚本">
+      <i class="fa fa-chevron-left"></i> 字幕重命名批处理脚本
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%9B%BE%E7%89%87%E6%93%8D%E4%BD%9C"><span class="nav-number">1.</span> <span class="nav-text">图片操作</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%AF%BB%E5%8F%96%E5%9B%BE%E7%89%87"><span class="nav-number">1.1.</span> <span class="nav-text">读取图片</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9B%BE%E5%83%8F%E6%98%BE%E7%A4%BA"><span class="nav-number">1.2.</span> <span class="nav-text">图像显示</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#openCV"><span class="nav-number">1.2.1.</span> <span class="nav-text">openCV</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#matplotlib-pyplot"><span class="nav-number">1.2.2.</span> <span class="nav-text">matplotlib.pyplot</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9B%BE%E5%83%8F%E4%BF%9D%E5%AD%98"><span class="nav-number">1.3.</span> <span class="nav-text">图像保存</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9B%BE%E5%83%8F%E6%88%AA%E5%8F%96"><span class="nav-number">1.4.</span> <span class="nav-text">图像截取</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BC%A9%E6%94%BE%E5%9B%BE%E7%89%87"><span class="nav-number">1.5.</span> <span class="nav-text">缩放图片</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%8E%B7%E5%8F%96%E5%B0%BA%E5%AF%B8"><span class="nav-number">1.6.</span> <span class="nav-text">获取尺寸</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BB%98%E5%88%B6%E7%9F%A9%E5%BD%A2"><span class="nav-number">1.7.</span> <span class="nav-text">绘制矩形</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E9%98%88%E5%80%BC%E5%88%86%E5%89%B2"><span class="nav-number">2.</span> <span class="nav-text">阈值分割</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%AE%80%E5%8D%95%E9%98%88%E5%80%BC"><span class="nav-number">2.1.</span> <span class="nav-text">简单阈值</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%BD%A2%E6%80%81%E5%AD%A6%E5%A4%84%E7%90%86"><span class="nav-number">3.</span> <span class="nav-text">形态学处理</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%85%90%E8%9A%80"><span class="nav-number">3.1.</span> <span class="nav-text">腐蚀</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%86%A8%E8%83%80"><span class="nav-number">3.2.</span> <span class="nav-text">膨胀</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%BC%80%E8%BF%90%E7%AE%97"><span class="nav-number">3.3.</span> <span class="nav-text">开运算</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%97%AD%E8%BF%90%E7%AE%97"><span class="nav-number">3.4.</span> <span class="nav-text">闭运算</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E8%BD%AE%E5%BB%93%E5%AF%BB%E6%89%BE"><span class="nav-number">4.</span> <span class="nav-text">轮廓寻找</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BB%98%E5%88%B6%E8%BD%AE%E5%BB%93"><span class="nav-number">4.1.</span> <span class="nav-text">绘制轮廓</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%A8%A1%E6%9D%BF%E5%8C%B9%E9%85%8D"><span class="nav-number">5.</span> <span class="nav-text">模板匹配</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8C%B9%E9%85%8D%E6%AD%A5%E9%AA%A4"><span class="nav-number">5.1.</span> <span class="nav-text">匹配步骤</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8C%B9%E9%85%8D%E7%AE%97%E6%B3%95"><span class="nav-number">5.2.</span> <span class="nav-text">匹配算法</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B9%B3%E6%96%B9%E5%B7%AE%E5%8C%B9%E9%85%8D-TM-SQDIFF"><span class="nav-number">5.2.1.</span> <span class="nav-text">平方差匹配(TM_SQDIFF)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A0%87%E5%87%86%E5%B9%B3%E6%96%B9%E5%B7%AE%E5%8C%B9%E9%85%8D-TM-SQDIFF-NORMED"><span class="nav-number">5.2.2.</span> <span class="nav-text">标准平方差匹配(TM_SQDIFF_NORMED)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%9B%B8%E5%85%B3%E5%8C%B9%E9%85%8D-TM-CCORR"><span class="nav-number">5.2.3.</span> <span class="nav-text">相关匹配(TM_CCORR)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A0%87%E5%87%86%E7%9B%B8%E5%85%B3%E5%8C%B9%E9%85%8D-TM-CCORR-NORMED"><span class="nav-number">5.2.4.</span> <span class="nav-text">标准相关匹配(TM_CCORR_NORMED)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%9B%B8%E5%85%B3%E5%8C%B9%E9%85%8D-TM-CCOEFF"><span class="nav-number">5.2.5.</span> <span class="nav-text">相关匹配(TM_CCOEFF)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A0%87%E5%87%86%E7%9B%B8%E5%85%B3%E5%8C%B9%E9%85%8D-TM-CCOEFF-NORMED"><span class="nav-number">5.2.6.</span> <span class="nav-text">标准相关匹配(TM_CCOEFF_NORMED)</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%8E%B7%E5%8F%96%E5%9D%90%E6%A0%87"><span class="nav-number">5.3.</span> <span class="nav-text">获取坐标</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Ziqiang Young"
+      src="https://resource-station.github.io/Avatar/Comrade-215x215.jpg">
+  <p class="site-author-name" itemprop="name">Ziqiang Young</p>
+  <div class="site-description" itemprop="description">人海汹涌，红旗飘扬，呼声嘹亮</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives">
+          <span class="site-state-item-count">5</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">15</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/ZiqiangYoung" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;ZiqiangYoung" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://space.bilibili.com/1651613349" title="bilibili → https:&#x2F;&#x2F;space.bilibili.com&#x2F;1651613349" rel="noopener" target="_blank"><i class="fa fa-thumbs-up fa-fw"></i>bilibili</a>
+      </span>
+  </div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2020 – 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Ziqiang Young</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+    <span title="站点总字数">74k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">1:08</span>
+</div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+  <script>
+    (function(){
+      var canonicalURL, curProtocol;
+      //Get the <link> tag
+      var x=document.getElementsByTagName("link");
+		//Find the last canonical URL
+		if(x.length > 0){
+			for (i=0;i<x.length;i++){
+				if(x[i].rel.toLowerCase() == 'canonical' && x[i].href){
+					canonicalURL=x[i].href;
+				}
+			}
+		}
+    //Get protocol
+	    if (!canonicalURL){
+	    	curProtocol = window.location.protocol.split(':')[0];
+	    }
+	    else{
+	    	curProtocol = canonicalURL.split(':')[0];
+	    }
+      //Get current URL if the canonical URL does not exist
+	    if (!canonicalURL) canonicalURL = window.location.href;
+	    //Assign script content. Replace current URL with the canonical URL
+      !function(){var e=/([http|https]:\/\/[a-zA-Z0-9\_\.]+\.baidu\.com)/gi,r=canonicalURL,t=document.referrer;if(!e.test(r)){var n=(String(curProtocol).toLowerCase() === 'https')?"https://sp0.baidu.com/9_Q4simg2RQJ8t7jm9iCKT-xh_/s.gif":"//api.share.baidu.com/s.gif";t?(n+="?r="+encodeURIComponent(document.referrer),r&&(n+="&l="+r)):r&&(n+="?l="+r);var i=new Image;i.src=n}}(window);})();
+  </script>
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>
