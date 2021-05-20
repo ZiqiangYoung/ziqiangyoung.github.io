@@ -1,94 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
-    <title>字幕重命名批处理脚本</title>
-    <url>/2021/RenameShell/</url>
-    <content><![CDATA[<p>将字幕<code>ass</code>全部重命名为与视频<code>mkv</code>一致</p>
-<span id="more"></span>
-
-<h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>最近在看数字图像处理的一些经典思想和算法，重构了一些底层并做了一些应用，简单的数字图像处理已经有点入门了，进一步打算尝试一下视频的简单数字图像处理。</p>
-<p>我去字幕组论坛搞了一些相关资料，顺手下了一份钢之炼金术师的BD rip打算边看边练手。手头有一份字幕，但是<code>PotPlayer</code>无法自动匹配对应字幕文件(想想也不太可能)，于是决定把字幕<code>ass</code>全部重命名为与视频<code>mkv</code>一致。几十个文件人工做太浪费时间，决定顺手写个批处理的脚本。</p>
-<h2 id="需求"><a href="#需求" class="headerlink" title="需求"></a>需求</h2><p>有以下源文件:</p>
-<details>
-  <summary>展开FilesTree</summary>
-  <pre><tree>
-D:.
-│  CreateFilesTree.bat
-│  FilesTree.txt
-│  [POPGO][Fullmetal_Alchemist][TV_2009][1-64][ASS].rar
-│  
-├─[POPGO][Fullmetal_Alchemist][TV_2009][1-64][ASS]
-│      [POPGO][Fullmetal_Alchemist][TV_2009][X264_AAC][01](8BF4B9FD).jp.ass
-│      [POPGO][Fullmetal_Alchemist][TV_2009][X264_AAC][01](8BF4B9FD).sc.ass
-│    ………………………………
-│      [POPGO][Fullmetal_Alchemist][TV_2009][X264_AAC][64](B817EA79).jp.ass
-│      [POPGO][Fullmetal_Alchemist][TV_2009][X264_AAC][64](B817EA79).sc.ass
-│      
-└─[VCB-Studio] Fullmetal Alchemist? Brotherhood [Ma10p_1080p]
-    │  [VCB-Studio] Fullmetal Alchemist? Brotherhood [01][Ma10p_1080p][x265_flac].mkv
-    │    …………………………
-    │  [VCB-Studio] Fullmetal Alchemist? Brotherhood [64][Ma10p_1080p][x265_flac].mkv
-    │  
-    └─SPs
-  </tree></pre>
-</details>
-
-<p>处理方式：</p>
-<ol>
-<li>重命名<br> <code>[POPGO][Fullmetal_Alchemist][TV_2009][X264_AAC][01](8BF4B9FD).sc.ass</code>–&gt;<code>[VCB-Studio] Fullmetal Alchemist꞉ Brotherhood [01][Ma10p_1080p][x265_flac].sc.ass</code></li>
-<li>重命名<br> <code>[POPGO][Fullmetal_Alchemist][TV_2009][X264_AAC][01](8BF4B9FD).jp.ass</code>–&gt;<code>[VCB-Studio] Fullmetal Alchemist꞉ Brotherhood [01][Ma10p_1080p][x265_flac].jp.ass</code></li>
-<li>64集Ass(128files)全部按照上述对应关系重命名</li>
-</ol>
-<h2 id="分析"><a href="#分析" class="headerlink" title="分析"></a>分析</h2><ol>
-<li>要实现批处理脚本,第一时间想到<ol>
-<li>linux shell</li>
-<li>windows bat</li>
-<li>python script</li>
-</ol>
-</li>
-<li>python 实现要使用到<ol>
-<li><code>os.listdir</code>遍历目录</li>
-<li><code>shutil.copyfiles</code>复制文件</li>
-<li><code>re.search</code>搜索子串</li>
-</ol>
-</li>
-</ol>
-<h2 id="实现"><a href="#实现" class="headerlink" title="实现"></a>实现</h2><p>python:（ASS_[POPGO]2[VCB-Studio]_FullmetalAlchemist.py）</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> os</span><br><span class="line"><span class="keyword">import</span> shutil</span><br><span class="line"><span class="keyword">import</span> re</span><br><span class="line"></span><br><span class="line">RESOURCE_PATH = <span class="string">&#x27;../res/ASS_[POPGO]&#x27;</span></span><br><span class="line">OUTPUT_PATH = <span class="string">&#x27;../res/ASS_[VCB-Studio]&#x27;</span></span><br><span class="line"></span><br><span class="line">fileList = os.listdir(RESOURCE_PATH)  <span class="comment"># [POPGO][Fullmetal_Alchemist][TV_2009][X264_AAC][01](8BF4B9FD).sc.ass</span></span><br><span class="line"><span class="keyword">for</span> fileName <span class="keyword">in</span> fileList:</span><br><span class="line">    outputFileName = <span class="string">&#x27;[VCB-Studio] Fullmetal Alchemist꞉ Brotherhood [&#x27;</span> + fileName[<span class="number">48</span>:<span class="number">50</span>] + <span class="string">&#x27;][Ma10p_1080p][x265_flac]&#x27;</span></span><br><span class="line">    <span class="keyword">if</span> re.search(<span class="string">&#x27;.sc.ass&#x27;</span>, fileName):</span><br><span class="line">        outputFilePath = OUTPUT_PATH + <span class="string">&#x27;/&#x27;</span> + outputFileName + <span class="string">&#x27;.sc.ass&#x27;</span></span><br><span class="line">    <span class="keyword">elif</span> re.search(<span class="string">&#x27;.jp.ass&#x27;</span>, fileName):</span><br><span class="line">        outputFilePath = OUTPUT_PATH + <span class="string">&#x27;/&#x27;</span> + outputFileName + <span class="string">&#x27;.jp.ass&#x27;</span></span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        <span class="keyword">raise</span> Exception(ValueError,<span class="string">&#x27;NOT_MATCH&#x27;</span>)</span><br><span class="line">    shutil.copyfile(RESOURCE_PATH +<span class="string">&#x27;/&#x27;</span> + fileName, outputFilePath)</span><br></pre></td></tr></table></figure>
-
-<h2 id="效果"><a href="#效果" class="headerlink" title="效果"></a>效果</h2><details>
-  <summary>展开FilesTree</summary>
-  <pre><tree>  
-D:.
-│  CreateFilesTree.bat
-│  FilesTree.txt
-│  
-├─ASS_[POPGO]
-│      [POPGO][Fullmetal_Alchemist][TV_2009][X264_AAC][01](8BF4B9FD).jp.ass
-│      [POPGO][Fullmetal_Alchemist][TV_2009][X264_AAC][01](8BF4B9FD).sc.ass
-│            ………………………………
-│      [POPGO][Fullmetal_Alchemist][TV_2009][X264_AAC][64](B817EA79).jp.ass
-│      [POPGO][Fullmetal_Alchemist][TV_2009][X264_AAC][64](B817EA79).sc.ass
-│      
-└─ASS_[VCB-Studio]
-        [VCB-Studio] Fullmetal Alchemist? Brotherhood [01][Ma10p_1080p][x265_flac].jp.ass
-        [VCB-Studio] Fullmetal Alchemist? Brotherhood [01][Ma10p_1080p][x265_flac].sc.ass
-            ………………………………
-        [VCB-Studio] Fullmetal Alchemist? Brotherhood [64][Ma10p_1080p][x265_flac].jp.ass
-        [VCB-Studio] Fullmetal Alchemist? Brotherhood [64][Ma10p_1080p][x265_flac].sc.ass
-  </tree></pre>
-</details>
-
-<p><img src="https://resource-station.github.io/Markdown/ASS_bat.png" alt="ASS_bat"></p>
-<p>–END–</p>
-]]></content>
-      <tags>
-        <tag>批处理</tag>
-        <tag>python</tag>
-        <tag>ASS</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>OpenCV笔记</title>
     <url>/2021/openCV_note/</url>
     <content><![CDATA[<p>最近为了满足一个数字图像处理需求,稍微入门了一下openCv,特此整理用到的主要内容。</p>
@@ -429,6 +341,94 @@ D:.
         <tag>数字图像处理</tag>
         <tag>轮廓检测</tag>
         <tag>阈值分割</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>字幕重命名批处理脚本</title>
+    <url>/2021/renameAss2Mkv/</url>
+    <content><![CDATA[<p>将字幕<code>ass</code>全部重命名为与视频<code>mkv</code>一致</p>
+<span id="more"></span>
+
+<h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>最近在看数字图像处理的一些经典思想和算法，重构了一些底层并做了一些应用，简单的数字图像处理已经有点入门了，进一步打算尝试一下视频的简单数字图像处理。</p>
+<p>我去字幕组论坛搞了一些相关资料，顺手下了一份钢之炼金术师的BD rip打算边看边练手。手头有一份字幕，但是<code>PotPlayer</code>无法自动匹配对应字幕文件(想想也不太可能)，于是决定把字幕<code>ass</code>全部重命名为与视频<code>mkv</code>一致。几十个文件人工做太浪费时间，决定顺手写个批处理的脚本。</p>
+<h2 id="需求"><a href="#需求" class="headerlink" title="需求"></a>需求</h2><p>有以下源文件:</p>
+<details>
+  <summary>展开FilesTree</summary>
+  <pre><tree>
+D:.
+│  CreateFilesTree.bat
+│  FilesTree.txt
+│  [POPGO][Fullmetal_Alchemist][TV_2009][1-64][ASS].rar
+│  
+├─[POPGO][Fullmetal_Alchemist][TV_2009][1-64][ASS]
+│      [POPGO][Fullmetal_Alchemist][TV_2009][X264_AAC][01](8BF4B9FD).jp.ass
+│      [POPGO][Fullmetal_Alchemist][TV_2009][X264_AAC][01](8BF4B9FD).sc.ass
+│    ………………………………
+│      [POPGO][Fullmetal_Alchemist][TV_2009][X264_AAC][64](B817EA79).jp.ass
+│      [POPGO][Fullmetal_Alchemist][TV_2009][X264_AAC][64](B817EA79).sc.ass
+│      
+└─[VCB-Studio] Fullmetal Alchemist? Brotherhood [Ma10p_1080p]
+    │  [VCB-Studio] Fullmetal Alchemist? Brotherhood [01][Ma10p_1080p][x265_flac].mkv
+    │    …………………………
+    │  [VCB-Studio] Fullmetal Alchemist? Brotherhood [64][Ma10p_1080p][x265_flac].mkv
+    │  
+    └─SPs
+  </tree></pre>
+</details>
+
+<p>处理方式：</p>
+<ol>
+<li>重命名<br> <code>[POPGO][Fullmetal_Alchemist][TV_2009][X264_AAC][01](8BF4B9FD).sc.ass</code>–&gt;<code>[VCB-Studio] Fullmetal Alchemist꞉ Brotherhood [01][Ma10p_1080p][x265_flac].sc.ass</code></li>
+<li>重命名<br> <code>[POPGO][Fullmetal_Alchemist][TV_2009][X264_AAC][01](8BF4B9FD).jp.ass</code>–&gt;<code>[VCB-Studio] Fullmetal Alchemist꞉ Brotherhood [01][Ma10p_1080p][x265_flac].jp.ass</code></li>
+<li>64集Ass(128files)全部按照上述对应关系重命名</li>
+</ol>
+<h2 id="分析"><a href="#分析" class="headerlink" title="分析"></a>分析</h2><ol>
+<li>要实现批处理脚本,第一时间想到<ol>
+<li>linux shell</li>
+<li>windows bat</li>
+<li>python script</li>
+</ol>
+</li>
+<li>python 实现要使用到<ol>
+<li><code>os.listdir</code>遍历目录</li>
+<li><code>shutil.copyfiles</code>复制文件</li>
+<li><code>re.search</code>搜索子串</li>
+</ol>
+</li>
+</ol>
+<h2 id="实现"><a href="#实现" class="headerlink" title="实现"></a>实现</h2><p>python:（renameAss2Mkv.py）</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> os</span><br><span class="line"><span class="keyword">import</span> shutil</span><br><span class="line"><span class="keyword">import</span> re</span><br><span class="line"><span class="keyword">import</span> tkinter.filedialog</span><br><span class="line"></span><br><span class="line">root=tkinter.Tk().withdraw()</span><br><span class="line"></span><br><span class="line">SOURCE_MKV_PATH = tkinter.filedialog.askdirectory(title=<span class="string">&#x27;选择 视频文件夹&#x27;</span>,initialdir=<span class="string">r&#x27;D:\Media\Video\动漫&#x27;</span>)</span><br><span class="line">SOURCE_ASS_PATH = tkinter.filedialog.askdirectory(title=<span class="string">&#x27;选择 已有字幕文件夹&#x27;</span>,initialdir=<span class="string">r&#x27;D:\Media\Video\动漫&#x27;</span>)</span><br><span class="line">OUTPUT_PATH = tkinter.filedialog.askdirectory(title=<span class="string">&#x27;选择 输出字幕文件夹&#x27;</span>,initialdir=<span class="string">r&#x27;D:\Media\Video\动漫&#x27;</span>)</span><br><span class="line"></span><br><span class="line">assList = os.listdir(SOURCE_ASS_PATH)</span><br><span class="line">mkvList = os.listdir(SOURCE_MKV_PATH)</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> mkvName <span class="keyword">in</span> mkvList:</span><br><span class="line">    reMatch_mkv_episode = re.search(<span class="string">&#x27;\[[0-9][0-9]]&#x27;</span>, mkvName)</span><br><span class="line">    <span class="keyword">if</span> reMatch_mkv_episode:</span><br><span class="line">        episode = mkvName[reMatch_mkv_episode.regs[<span class="number">0</span>][<span class="number">0</span>]+<span class="number">1</span>:reMatch_mkv_episode.regs[<span class="number">0</span>][<span class="number">1</span>]-<span class="number">1</span>]</span><br><span class="line"></span><br><span class="line">        <span class="keyword">for</span> assName <span class="keyword">in</span> assList:</span><br><span class="line">            <span class="keyword">if</span> re.search(episode, assName):</span><br><span class="line">                reMatch_mkv_Suffix = re.search(<span class="string">&#x27;\.&#x27;</span>, mkvName)</span><br><span class="line">                ass_Suffix = assName[re.search(<span class="string">&#x27;\.&#x27;</span>, assName).regs[<span class="number">0</span>][<span class="number">0</span>]:<span class="built_in">len</span>(assName)]</span><br><span class="line"></span><br><span class="line">                outputFileName = mkvName[</span><br><span class="line">                                 <span class="number">0</span>: reMatch_mkv_episode.regs[<span class="number">0</span>][<span class="number">0</span>]</span><br><span class="line">                                 ] + episode + mkvName[</span><br><span class="line">                                               reMatch_mkv_episode.regs[<span class="number">0</span>][<span class="number">1</span>]:</span><br><span class="line">                                               reMatch_mkv_Suffix.regs[<span class="number">0</span>][<span class="number">0</span>]</span><br><span class="line">                                               ] + ass_Suffix</span><br><span class="line"></span><br><span class="line">                shutil.copyfile(SOURCE_ASS_PATH + <span class="string">&#x27;/&#x27;</span> + assName, OUTPUT_PATH + <span class="string">&#x27;/&#x27;</span> + outputFileName)</span><br></pre></td></tr></table></figure>
+
+<h2 id="效果"><a href="#效果" class="headerlink" title="效果"></a>效果</h2><details>
+  <summary>展开FilesTree</summary>
+  <pre><tree>  
+D:.
+│  CreateFilesTree.bat
+│  FilesTree.txt
+│  
+├─ASS_[POPGO]
+│      [POPGO][Fullmetal_Alchemist][TV_2009][X264_AAC][01](8BF4B9FD).jp.ass
+│      [POPGO][Fullmetal_Alchemist][TV_2009][X264_AAC][01](8BF4B9FD).sc.ass
+│            ………………………………
+│      [POPGO][Fullmetal_Alchemist][TV_2009][X264_AAC][64](B817EA79).jp.ass
+│      [POPGO][Fullmetal_Alchemist][TV_2009][X264_AAC][64](B817EA79).sc.ass
+│      
+└─ASS_[VCB-Studio]
+        [VCB-Studio] Fullmetal Alchemist? Brotherhood [01][Ma10p_1080p][x265_flac].jp.ass
+        [VCB-Studio] Fullmetal Alchemist? Brotherhood [01][Ma10p_1080p][x265_flac].sc.ass
+            ………………………………
+        [VCB-Studio] Fullmetal Alchemist? Brotherhood [64][Ma10p_1080p][x265_flac].jp.ass
+        [VCB-Studio] Fullmetal Alchemist? Brotherhood [64][Ma10p_1080p][x265_flac].sc.ass
+  </tree></pre>
+</details>
+
+<p><img src="https://resource-station.github.io/Markdown/ASS_bat.png" alt="ASS_bat"></p>
+<p>–END–</p>
+]]></content>
+      <tags>
+        <tag>python</tag>
+        <tag>批处理</tag>
+        <tag>ASS</tag>
       </tags>
   </entry>
   <entry>
